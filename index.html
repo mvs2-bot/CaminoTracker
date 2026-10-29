@@ -376,9 +376,9 @@
 
       <div class="card ledger" aria-label="Kennzahlen">
         <div class="first"><span class="v num"><span x-text="fmtKm(stats().km)"></span><small>km</small></span><span class="k" x-text="santiagoHint()"></span></div>
-        <div><span class="v num" x-text="stats().days"></span><span class="k" x-text="stats().days ? 'Wandertage · Ø ' + fmtKm(stats().km / stats().days, 1) + ' km' : 'Wandertage'"></span></div>
+        <div><span class="v num" x-text="stats().days"></span><span class="k">Wandertage</span></div>
         <div><span class="v num" x-text="routes.length"></span><span class="k" x-text="routes.length === 1 ? 'Camino' : 'Caminos'"></span></div>
-        <div><span class="v num" x-text="stays.length"></span><span class="k" x-text="stays.length === 1 ? 'Nacht' : 'Nächte'"></span></div>
+        <div><span class="v num"><span x-text="stats().days ? fmtKm(stats().km / stats().days, 1) : '–'"></span><small x-show="stats().days">km</small></span><span class="k">Ø pro Tag</span></div>
         <div><span class="v num"><span x-text="fmtInt(stats().ascent)"></span><small>m</small></span><span class="k">Aufstieg</span></div>
         <div><span class="v num"><span x-text="stats().longest ? fmtKm(stats().longest.distance_km, 1) : '–'"></span><small x-show="stats().longest">km</small></span><span class="k">Längste Etappe</span></div>
       </div>
@@ -388,7 +388,7 @@
         <button class="btn" type="button" @click="openRoute()"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg>Route</button>
       </div>
       <div class="card routes" x-show="routes.length">
-        <div class="routes-head" aria-hidden="true"><span></span><span>Weg</span><span>km</span><span>Tage</span><span>Nächte</span></div>
+        <div class="routes-head" aria-hidden="true"><span></span><span>Weg</span><span>km</span><span>Tage</span><span>Aufstieg</span></div>
         <template x-for="r in routes" :key="r.id">
           <div class="route" :class="{ on: focus === r.id }">
             <button type="button" class="pick" @click="focusRoute(r.id); $refs.map.scrollIntoView({ behavior: 'smooth', block: 'center' })" :aria-label="r.name + ' auf der Karte zeigen'">
@@ -400,7 +400,7 @@
               <span class="cols">
                 <span class="col num"><span x-text="r.distance_km ? fmtKm(r.distance_km) : '–'"></span><small>km</small></span>
                 <span class="col num"><span x-text="routeDays(r) || '–'"></span><small>Tage</small></span>
-                <span class="col num"><span x-text="staysOf(r).length"></span><small>Nächte</small></span>
+                <span class="col num"><span x-text="r.ascent_m ? fmtInt(r.ascent_m) : '–'"></span><small>Hm</small></span>
               </span>
             </button>
             <button type="button" class="edit" @click="openRoute(r)" :aria-label="r.name + ' bearbeiten'"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 20h4L19 9l-4-4L4 16z"/><path d="m13.5 6.5 4 4"/></svg></button>
