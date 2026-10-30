@@ -195,6 +195,8 @@
     .stay { display: flex; align-items: center; gap: 14px; width: 100%; min-height: 64px; padding: 10px 16px; border: 0; background: none; text-align: left; transition: background .15s; }
     .stay + .stay { box-shadow: 0 -1px 0 var(--sep); }
     .stay:hover { background: var(--hover); }
+    .stay:disabled { color: inherit; opacity: 1; cursor: default; }
+    .stay:disabled:hover { background: none; }
     .stay .cal { flex: none; width: 50px; text-align: center; border-radius: 10px; background: var(--lichen-soft); color: var(--lichen-ink); padding: 4px 0 5px; line-height: 1; }
     .stay .cal small { display: block; font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: .06em; }
     .stay .cal b { display: block; margin-top: 2px; font-family: var(--display); font-size: 20px; font-weight: 600; font-variant-numeric: tabular-nums; }
@@ -376,7 +378,7 @@
   <!-- Kein Zugriff -->
   <section x-show="view === 'noaccess'" x-cloak class="card gate fade-enter">
     <h2>Privat</h2>
-    <p class="lead">Der Camino Tracker ist ein privates Modul. Dein Konto <b x-text="user?.email"></b> hat hier keinen Zugriff.</p>
+    <p class="lead">Der Camino Tracker ist privat. Dein Konto <b x-text="user?.email"></b> ist dafür nicht freigeschaltet.</p>
     <a class="btn ghost wide" href="/">Zum Dashboard</a>
   </section>
 
@@ -412,7 +414,7 @@
 
       <div class="sec-head">
         <h2>Caminos</h2>
-        <button class="btn" type="button" @click="openRoute()"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg>Route</button>
+        <button class="btn" type="button" x-show="owner" @click="openRoute()"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg>Route</button>
       </div>
       <div class="card routes" x-show="routes.length">
         <div class="routes-head" aria-hidden="true"><span></span><span>Weg</span><span>km</span><span>Tage</span><span>Aufstieg</span></div>
@@ -432,7 +434,7 @@
                 <span class="col num"><span x-text="r.ascent_m ? fmtInt(r.ascent_m) : '–'"></span><small>Hm</small></span>
               </span>
             </button>
-            <button type="button" class="edit" @click="openRoute(r)" :aria-label="r.name + ' bearbeiten'"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 20h4L19 9l-4-4L4 16z"/><path d="m13.5 6.5 4 4"/></svg></button>
+            <button type="button" class="edit" x-show="owner" @click="openRoute(r)" :aria-label="r.name + ' bearbeiten'"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 20h4L19 9l-4-4L4 16z"/><path d="m13.5 6.5 4 4"/></svg></button>
           </div>
           <template x-if="stagesOf(r).length">
             <div>
@@ -460,7 +462,7 @@
       <div class="card empty" x-show="!routes.length">
         <h3>Noch kein Camino erfasst</h3>
         <p>Lade die GPX-Dateien eines Weges hoch. Strecke, Höhenmeter, Zeitraum und Etappen werden daraus berechnet.</p>
-        <button class="btn" type="button" @click="openRoute()">Ersten Camino anlegen</button>
+        <button class="btn" type="button" x-show="owner" @click="openRoute()">Ersten Camino anlegen</button>
       </div>
     </section>
 
@@ -472,7 +474,7 @@
           <template x-for="r in routes" :key="r.id"><option :value="r.id" x-text="r.name"></option></template>
           <option value="none">Ohne Route</option>
         </select>
-        <button class="btn" type="button" @click="openStay()"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg>Unterkunft</button>
+        <button class="btn" type="button" x-show="owner" @click="openStay()"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg>Unterkunft</button>
       </div>
 
       <template x-for="g in stayGroups()" :key="g.key">
@@ -480,7 +482,7 @@
           <p class="group-label"><span class="swatch" :style="'background:' + g.color"></span><span x-text="g.label"></span><span class="muted" x-text="g.items.length + (g.items.length === 1 ? ' Nacht' : ' Nächte')"></span></p>
           <div class="card list">
             <template x-for="s in g.items" :key="s.id">
-              <button type="button" class="stay" @click="openStay(s)">
+              <button type="button" class="stay" :disabled="!owner" @click="owner && openStay(s)">
                 <span class="cal"><small x-text="monthShort(s.stay_date)"></small><b x-text="+s.stay_date.slice(8, 10)"></b></span>
                 <span class="txt">
                   <span class="name" x-text="s.name"></span>
@@ -498,7 +500,7 @@
       <div class="card empty" x-show="!stayGroups().length">
         <h3>Noch keine Unterkünfte</h3>
         <p>Trage Albergues, Pensiones und Hotels mit dem Datum der Übernachtung ein.</p>
-        <button class="btn" type="button" @click="openStay()">Unterkunft eintragen</button>
+        <button class="btn" type="button" x-show="owner" @click="openStay()">Unterkunft eintragen</button>
       </div>
     </section>
   </div>
@@ -697,7 +699,7 @@ const toLatLngs = track => track.coordinates.map(seg => seg.map(([x, y]) => [y, 
 /* ---------------- App ---------------- */
 function camino() {
   return {
-    sb: null, view: 'loading', tab: 'overview', user: null, menuOpen: false,
+    sb: null, view: 'loading', tab: 'overview', user: null, menuOpen: false, owner: false,
     me: { name: '', initials: '', photo: null, admin: false },
     dark: document.documentElement.classList.contains('dark'),
     form: { email: '', password: '', error: '', busy: false },
@@ -729,8 +731,10 @@ function camino() {
 
     async enter() {
       this.loadMe().catch(console.error);
-      const { data } = await this.sb.rpc('camino_is_owner');
-      if (data !== true) { this.view = 'noaccess'; return; }
+      // Eigentümer bearbeitet, Freigeschaltete (caminotracker ab Mitglied) sehen nur zu
+      const [own, view] = await Promise.all([this.sb.rpc('camino_is_owner'), this.sb.rpc('camino_can_view')]);
+      this.owner = own.data === true;
+      if (!this.owner && view.data !== true) { this.view = 'noaccess'; return; }
       this.view = 'app';
       await this.load();
       if (this.tab === 'overview') this.$nextTick(() => this.drawMap());
