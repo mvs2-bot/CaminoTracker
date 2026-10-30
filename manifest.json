@@ -1,0 +1,9 @@
+{
+  "name": "Camino Tracker",
+  "short_name": "Camino",
+  "start_url": "./",
+  "display": "standalone",
+  "background_color": "#f2f2f7",
+  "theme_color": "#f2b705",
+  "icons": [{ "src": "apple-touch-icon.png", "sizes": "180x180", "type": "image/png" }]
+}
