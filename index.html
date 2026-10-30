@@ -164,7 +164,7 @@
     .route .trail svg { width: 64px; height: 36px; }
     .route .txt { min-width: 0; text-align: left; border: 0; background: none; padding: 4px 0; }
     .route .txt b { display: flex; align-items: center; gap: 8px; font-family: var(--display); font-size: 15px; font-weight: 600; letter-spacing: -.01em; color: var(--ink); line-height: 1.3; }
-    .route .txt span { display: block; font-size: 13px; color: var(--mute); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .route .txt span { display: block; font-size: 13px; color: var(--mute); line-height: 1.35; }
     .route .col { text-align: right; font-size: 16px; font-weight: 600; color: var(--ink); line-height: 1.1; }
     .route .col small { display: block; font-family: var(--font); font-size: 12px; font-weight: 500; color: var(--mute); }
     .route .edit { width: 44px; height: 44px; border: 0; border-radius: 50%; background: none; color: var(--mute); display: grid; place-items: center; }
@@ -377,9 +377,9 @@
       <div class="card map-card">
         <div id="map" x-ref="map" role="region" aria-label="Karte der gelaufenen Wege"></div>
         <div class="chips" x-show="routes.length">
-          <button type="button" class="chip" :aria-pressed="focus === null" @click="focusRoute(null)">Alle Wege</button>
+          <button type="button" class="chip" :aria-pressed="focus === null" @click="focusRoute(null)">Alle</button>
           <template x-for="r in routes" :key="r.id">
-            <button type="button" class="chip" :aria-pressed="focus === r.id" @click="focusRoute(r.id)"><span class="swatch" :style="'background:' + r.color"></span><span x-text="r.name"></span></button>
+            <button type="button" class="chip" :aria-pressed="focus === r.id" @click="focusRoute(r.id)" :title="r.name" :aria-label="r.name"><span class="swatch" :style="'background:' + r.color"></span><span class="num" x-text="chipLabel(r)"></span></button>
           </template>
           <button type="button" class="chip toggle" x-show="stays.some(s => s.lat != null)" :aria-pressed="showPins" @click="togglePins()" :title="showPins ? 'Unterkünfte ausblenden' : 'Unterkünfte einblenden'"><span class="pin-dot"></span>Unterkünfte</button>
         </div>
@@ -406,7 +406,8 @@
               <span class="trail"><template x-if="r.track"><svg viewBox="0 0 100 56" preserveAspectRatio="xMidYMid meet" x-html="sparkline(r)" aria-hidden="true"></svg></template></span>
               <span class="txt">
                 <b><span class="swatch" :style="'background:' + r.color"></span><span x-text="r.name"></span></b>
-                <span x-text="[[r.start_place, r.end_place].filter(Boolean).join(' – '), dateRange(r)].filter(Boolean).join(' · ')"></span>
+                <span x-text="[r.start_place, r.end_place].filter(Boolean).join(' – ')"></span>
+                <span x-text="dateRange(r)"></span>
               </span>
               <span class="cols">
                 <span class="col num"><span x-text="r.distance_km ? fmtKm(r.distance_km) : '–'"></span><small>km</small></span>
@@ -802,6 +803,8 @@ function camino() {
       if (this.showPins) M.stayLayer.addTo(M.map);
       this.focusRoute(this.focus);
     },
+    // Filter-Chip: nur das Jahr, damit die Leiste kompakt bleibt
+    chipLabel(r) { return (r.start_date || '').slice(0, 4) || (r.name.match(/\b(19|20)\d{2}\b/) || [r.name])[0]; },
     togglePins() {
       this.showPins = !this.showPins;
       try { localStorage.setItem('camino-pins', this.showPins ? 'on' : 'off'); } catch (_) {}
