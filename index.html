@@ -76,7 +76,7 @@
       background: color-mix(in srgb, var(--bg) 82%, transparent); -webkit-backdrop-filter: saturate(1.8) blur(18px); backdrop-filter: saturate(1.8) blur(18px); }
     @media (prefers-reduced-transparency: reduce) { header { background: var(--bg); -webkit-backdrop-filter: none; backdrop-filter: none; } }
     .bar { display: flex; align-items: center; gap: 10px; padding-block: 12px 10px; }
-    .bar .logo { width: 34px; height: 34px; flex: none; border-radius: 8px; display: block; }
+    .bar .logo { width: 36px; height: 36px; flex: none; border-radius: 9px; display: block; }
     .bar .head { flex: 1; min-width: 0; }
     h1 { font-size: 20px; line-height: 1.15; color: var(--ink); white-space: nowrap; }
     .sub { margin-top: 1px; font-size: 12px; font-weight: 500; color: var(--mute); font-variant-numeric: tabular-nums; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
@@ -277,7 +277,7 @@
       .ledger > div:nth-child(n+4) { border-top: 1px solid var(--sep); }
     }
     @media (max-width: 640px) {
-      h1 { font-size: 18px; } .sub { font-size: 12px; } .bar .logo { width: 30px; height: 30px; border-radius: 7px; }
+      h1 { font-size: 18px; } .sub { font-size: 12px; }
       #map { height: 46vh; }
       .ledger .v { font-size: 18px; } .ledger .first .v { font-size: 22px; }
       .ledger > div { padding: 12px 12px 14px; }
