@@ -6,7 +6,7 @@ Modul im Dashboard [mvs2-bot.github.io](https://mvs2-bot.github.io/), läuft dir
 | Datei | Inhalt |
 | --- | --- |
 | `index.html` | Komplette App: HTML, CSS (Apple-Designsprache wie DailyMind), Alpine.js, supabase-js, Leaflet. |
-| `supabase/001_camino_schema.sql` | Tabellen `camino_routes`, `camino_stages`, `camino_stays`, RLS. |
+| Datenbank | Migration `…_camino_core` im Repo `supabase-core`: Tabellen `camino_routes`, `camino_stages`, `camino_stays`, RLS. |
 | `shared/ios-nav.js` | Kopie aus dem Dashboard-Repo (Zurück/Neu laden in installierten iOS-Web-Apps). |
 
 ## Sicherheit
