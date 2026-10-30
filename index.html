@@ -6,10 +6,11 @@
   <title>Camino Tracker</title>
   <meta name="description" content="Camino Tracker – private Übersicht der gelaufenen Jakobswege.">
   <meta name="robots" content="noindex">
-  <meta name="theme-color" content="#ffffff" media="(prefers-color-scheme: light)">
-  <meta name="theme-color" content="#1c1c1e" media="(prefers-color-scheme: dark)">
+  <meta name="theme-color" content="#f2f2f7" media="(prefers-color-scheme: light)">
+  <meta name="theme-color" content="#000000" media="(prefers-color-scheme: dark)">
   <link rel="icon" type="image/svg+xml" href="icon.svg">
   <link rel="apple-touch-icon" href="apple-touch-icon.png">
+  <link rel="manifest" href="manifest.json">
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-title" content="Camino">
 
@@ -23,14 +24,14 @@
 
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/leaflet@1.9.4/dist/leaflet.css">
   <style>
-    /* Camino Tracker – Outdoor-App-Look: weißer Kopf, ruhige graue Fläche, Grün als Aktionsfarbe,
+    /* Camino Tracker – Apple-Look wie QuestLog/TravelBase: Kopf mit Material, Goldgelb (Logo) als Akzent,
        farbige Wege auf der normalen Karte. Systemschrift, Zahlen tabellarisch. */
     :root {
       --bg: #f2f2f7; --card: #fff; --well: #f2f2f7; --hover: #e9e9ef; --line: #e2e2e7; --sep: rgba(60, 60, 67, .14);
       --ink: #1c1c1e; --text: #3a3a3c; --mute: #6c6c70;
-      --p1: #3f7a10; --p1-soft: #ecf5e2; --on-p1: #fff;
+      --p1: #f2b705; --p1-ink: #8a6400; --p1-soft: #fdf3d0; --on-p1: #14295a;
       --band: #fff; --band-2: #f2f2f7; --band-ink: #1c1c1e; --band-mute: #6c6c70;
-      --lichen: #5a9e1b; --lichen-soft: #ecf5e2; --lichen-ink: #3f7310;
+      --lichen: #f2b705; --lichen-soft: #fdf3d0; --lichen-ink: #7a5800;
       --danger: #c4231b; --danger-soft: #fde8e6;
       --casing: #fff;
       --radius: 18px; --radius-s: 12px;
@@ -46,9 +47,9 @@
       color-scheme: dark;
       --bg: #000; --card: #1c1c1e; --well: #2c2c2e; --hover: #3a3a3c; --line: #38383a; --sep: rgba(84, 84, 88, .55);
       --ink: #f5f5f7; --text: #d1d1d6; --mute: #98989f;
-      --p1: #8bd14a; --p1-soft: #1d2a12; --on-p1: #10200a;
+      --p1: #f2b705; --p1-ink: #f6c945; --p1-soft: #332a05; --on-p1: #14295a;
       --band: #1c1c1e; --band-2: #2c2c2e; --band-ink: #f5f5f7; --band-mute: #98989f;
-      --lichen: #8bd14a; --lichen-soft: #1d2a12; --lichen-ink: #a8e070;
+      --lichen: #f2b705; --lichen-soft: #332a05; --lichen-ink: #f6c945;
       --danger: #ff8a7a; --danger-soft: #3a1612;
       --casing: #000;
       --shadow: none;
@@ -63,7 +64,7 @@
     button, input, textarea, select { font: inherit; color: inherit; accent-color: var(--p1); }
     button { cursor: pointer; }
     button:disabled { cursor: default; }
-    :focus-visible { outline: 2px solid var(--p1); outline-offset: 2px; border-radius: 6px; }
+    :focus-visible { outline: 2px solid var(--p1-ink); outline-offset: 2px; border-radius: 6px; }
     h1, h2, h3, p { margin: 0; }
     h1, h2, h3 { font-family: var(--display); font-weight: 700; letter-spacing: -.02em; color: var(--ink); text-wrap: balance; }
     .num { font-family: var(--display); font-variant-numeric: tabular-nums; }
@@ -71,22 +72,29 @@
     .wrap { max-width: 1080px; margin: 0 auto; padding-inline: max(16px, env(safe-area-inset-left, 0px)); }
 
     /* Kopfband */
-    header { position: sticky; top: 0; z-index: 1000; background: var(--band); color: var(--band-ink); padding-top: env(safe-area-inset-top, 0px); box-shadow: 0 1px 0 var(--line); }
-    .bar { display: flex; align-items: center; gap: 12px; padding-block: 12px 6px; }
+    header { position: sticky; top: 0; z-index: 1000; color: var(--ink); padding-top: env(safe-area-inset-top, 0px);
+      background: color-mix(in srgb, var(--bg) 82%, transparent); -webkit-backdrop-filter: saturate(1.8) blur(18px); backdrop-filter: saturate(1.8) blur(18px); }
+    @media (prefers-reduced-transparency: reduce) { header { background: var(--bg); -webkit-backdrop-filter: none; backdrop-filter: none; } }
+    .bar { display: flex; align-items: center; gap: 10px; padding-block: 12px 10px; }
     .bar .logo { width: 34px; height: 34px; flex: none; border-radius: 8px; display: block; }
     .bar .head { flex: 1; min-width: 0; }
-    h1 { font-size: 20px; line-height: 1.2; color: var(--band-ink); }
-    .sub { margin-top: 1px; font-size: 13px; font-weight: 500; color: var(--band-mute); font-variant-numeric: tabular-nums; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-    .acts { display: flex; gap: 6px; flex: none; }
-    .hbtn { position: relative; overflow: hidden; width: 44px; height: 44px; border: 0; border-radius: 50%; background: transparent; color: var(--band-ink);
+    h1 { font-size: 20px; line-height: 1.15; color: var(--ink); white-space: nowrap; }
+    .sub { margin-top: 1px; font-size: 12px; font-weight: 500; color: var(--mute); font-variant-numeric: tabular-nums; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .acts { display: flex; gap: 8px; flex: none; }
+    .hbtn { position: relative; overflow: hidden; width: 36px; height: 36px; border: 0; border-radius: 50%; background: var(--card); color: var(--ink); box-shadow: var(--shadow);
       display: inline-grid; place-items: center; padding: 0; transition: background .15s; }
-    .hbtn:hover { background: var(--band-2); }
-    .hbtn img { width: 32px; height: 32px; border-radius: 50%; object-fit: cover; }
-    .tabs { display: flex; gap: 4px; }
-    .tabs button { position: relative; border: 0; background: none; padding: 12px 14px 14px; min-height: 44px; font-size: 14px; font-weight: 600; color: var(--band-mute); transition: color .15s; }
-    .tabs button:hover { color: var(--band-ink); }
-    .tabs button[aria-selected="true"] { color: var(--band-ink); }
-    .tabs button[aria-selected="true"]::after { content: ""; position: absolute; left: 14px; right: 14px; bottom: 0; height: 3px; border-radius: 3px 3px 0 0; background: var(--lichen); }
+    .hbtn .ic { width: 19px; height: 19px; }
+    .dark .hbtn { background: var(--well); }
+    @media (hover: hover) { .hbtn:hover { background: var(--hover); } }
+    .hbtn img { width: 36px; height: 36px; border-radius: 50%; object-fit: cover; }
+    .tabs { display: flex; gap: 2px; margin: 2px 0 16px; padding: 2px; border-radius: 10px; background: color-mix(in srgb, var(--mute) 16%, transparent); }
+    .tabs button { flex: 1 1 0; display: inline-flex; align-items: center; justify-content: center; gap: 6px; min-height: 32px; padding: 6px 12px; border: 0; border-radius: 8px; background: none;
+      font-size: 13px; font-weight: 500; color: var(--ink); white-space: nowrap; }
+    .tabs button .ic { width: 16px; height: 16px; color: var(--mute); }
+    .tabs button[aria-selected="true"] { background: var(--card); font-weight: 600; box-shadow: 0 1px 3px rgba(0, 0, 0, .12), 0 0 0 .5px rgba(0, 0, 0, .04); }
+    .tabs button[aria-selected="true"] .ic { color: var(--p1-ink); }
+    .dark .tabs button[aria-selected="true"] { background: #636366; box-shadow: none; }
+    .dark .tabs button[aria-selected="true"] .ic { color: var(--ink); }
 
     /* Kontomenü */
     .me { position: relative; }
@@ -104,7 +112,7 @@
     .pm-item.danger, .pm-item.danger .ic { color: var(--danger); }
     .pm-sep { height: 1px; margin: 4px 6px; background: var(--sep); }
 
-    main { padding-block: 18px calc(48px + env(safe-area-inset-bottom, 0px)); }
+    main { padding-block: 4px calc(48px + env(safe-area-inset-bottom, 0px)); }
     .card { background: var(--card); border-radius: var(--radius); box-shadow: var(--shadow); }
     .sec-head { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin: 24px 4px 10px; }
     .sec-head h2 { font-size: 16px; font-weight: 600; letter-spacing: -.01em; line-height: 1.3; }
@@ -143,7 +151,7 @@
     .ledger .v { display: block; font-size: 20px; font-weight: 700; letter-spacing: -.02em; line-height: 1.05; color: var(--ink); white-space: nowrap; }
     .ledger .v small { font-size: 13px; font-weight: 500; letter-spacing: 0; color: var(--mute); margin-left: 3px; }
     .ledger .k { display: block; margin-top: 2px; font-size: 12px; font-weight: 500; color: var(--mute); }
-    .ledger .first .v { color: var(--p1); font-size: 24px; }
+    .ledger .first .v { color: var(--p1-ink); font-size: 24px; }
 
     /* Caminos als Liste */
     .routes { padding: 4px 0; }
@@ -198,7 +206,7 @@
     .btn.wide { width: 100%; border-radius: 12px; }
     .btn.ghost { background: var(--well); color: var(--ink); }
     .btn.red { background: var(--danger-soft); color: var(--danger); }
-    .link { min-height: 44px; padding: 0 2px; border: 0; background: none; font-size: 13px; font-weight: 600; color: var(--p1); }
+    .link { min-height: 44px; padding: 0 2px; border: 0; background: none; font-size: 13px; font-weight: 600; color: var(--p1-ink); }
 
     /* Formulare und Dialoge */
     dialog.sheet { width: min(580px, calc(100vw - 24px)); max-height: calc(100dvh - 24px); padding: 0; border: 0; border-radius: 18px; background: var(--bg); color: var(--text); box-shadow: var(--pop); }
@@ -216,12 +224,12 @@
     .fld.full { grid-column: 1 / -1; }
     .fld b { color: var(--danger); }
     .inp { width: 100%; min-width: 0; min-height: 44px; padding: 10px 12px; font-size: 16px; border: 1px solid var(--line); border-radius: 10px; background: var(--card); color: var(--ink); }
-    .inp:focus { outline: 2px solid var(--p1); outline-offset: -1px; border-color: transparent; }
+    .inp:focus { outline: 2px solid var(--p1-ink); outline-offset: -1px; border-color: transparent; }
     textarea.inp { resize: vertical; min-height: 80px; }
     input[type="color"].inp { padding: 4px; }
     .drop { display: grid; place-items: center; gap: 4px; padding: 20px; border-radius: 14px; border: 1.5px dashed color-mix(in srgb, var(--p1) 45%, var(--line)); background: var(--card); text-align: center; font-size: 14px; color: var(--mute); cursor: pointer; }
     .drop:hover, .drop.over { border-color: var(--p1); background: var(--p1-soft); }
-    .drop .ic { width: 26px; height: 26px; color: var(--p1); }
+    .drop .ic { width: 26px; height: 26px; color: var(--p1-ink); }
     .drop b { color: var(--ink); }
     .check { display: flex; align-items: center; gap: 10px; min-height: 44px; font-size: 14px; color: var(--ink); }
     .check input { width: 20px; height: 20px; }
@@ -235,7 +243,7 @@
     .rate button.on { color: var(--lichen); }
     #pickMap { height: 240px; border-radius: 12px; overflow: hidden; background: var(--well); }
     .msg { padding: 9px 12px; border-radius: 10px; font-size: 13px; font-weight: 500; background: var(--danger-soft); color: var(--danger); }
-    .msg.ok { background: var(--p1-soft); color: var(--p1); }
+    .msg.ok { background: var(--p1-soft); color: var(--p1-ink); }
 
     /* Anmeldung */
     .gate { max-width: 400px; margin: 9vh auto 0; padding: 24px; }
@@ -294,7 +302,7 @@
   const ADMIN_URL    = '/admin.html?from=camino';
   const KINDS = { albergue: 'Albergue', hostel: 'Hostel', pension: 'Pensión', hotel: 'Hotel', casa_rural: 'Casa rural', other: 'Sonstiges' };
   // Routenfarben: gut unterscheidbar auf der Karte, hell wie dunkel
-  const COLORS = ['#2f6fb0', '#d0541f', '#3d8a2a', '#8a4fb0', '#c4920c', '#14857a'];
+  const COLORS = ['#2f6fb0', '#d0541f', '#3d8a2a', '#8a4fb0', '#b23a6e', '#14857a'];
   const STAR = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="m12 2.8 2.8 5.8 6.3.9-4.6 4.4 1.1 6.3L12 17.2l-5.6 3 1.1-6.3L2.9 9.5l6.3-.9z"/></svg>';
 </script>
 
@@ -330,10 +338,6 @@
         </div>
       </div>
     </div>
-    <nav class="tabs" role="tablist" aria-label="Bereich" x-show="view === 'app'" x-cloak>
-      <button role="tab" @click="go('overview')" :aria-selected="tab === 'overview'" type="button">Übersicht</button>
-      <button role="tab" @click="go('stays')" :aria-selected="tab === 'stays'" type="button">Unterkünfte</button>
-    </nav>
   </div>
 </header>
 
@@ -361,6 +365,10 @@
   </section>
 
   <div x-show="view === 'app'" x-cloak>
+    <nav class="tabs" role="tablist" aria-label="Bereich">
+      <button role="tab" @click="go('overview')" :aria-selected="tab === 'overview'" type="button"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="m3 6 6-3 6 3 6-3v15l-6 3-6-3-6 3z"/><path d="M9 3v15M15 6v15"/></svg>Übersicht</button>
+      <button role="tab" @click="go('stays')" :aria-selected="tab === 'stays'" type="button"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M3 18V6M3 14h18v4M21 14v-2a3 3 0 0 0-3-3h-7v5"/><circle cx="7" cy="11" r="2"/></svg>Unterkünfte</button>
+    </nav>
     <p x-show="error" x-text="error" class="msg" role="alert" style="margin-bottom:14px"></p>
     <div x-show="loading" class="spin"></div>
 
